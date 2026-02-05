@@ -1,51 +1,39 @@
 using UnityEngine;
 
-public class Player : MonoBehaviour
+public class PlayerController : MonoBehaviour
 {
-    public float velocidade = 5f;
-    public float forcaPulo = 7f;
+    public float speed = 4f;
 
     private Rigidbody2D rb;
-    private SpriteRenderer spriteRenderer;
     private Animator animator;
 
-    private bool andando;
-    private bool noChao;
-
-    public Transform verificadorChao;
-    public LayerMask layerChao;
+    private float moveX;
 
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
-        spriteRenderer = GetComponent<SpriteRenderer>();
         animator = GetComponent<Animator>();
+
+        animator.SetBool("Andando", false); 
     }
 
     void Update()
     {
-        // Movimento horizontal
-        float movimento = Input.GetAxisRaw("Horizontal");
-        rb.linearVelocity = new Vector2(movimento * velocidade, rb.linearVelocity.y);
+        moveX = Input.GetAxisRaw("Horizontal");
 
-        // Flip do sprite
-        if (movimento > 0)
-            spriteRenderer.flipX = false;
-        else if (movimento < 0)
-            spriteRenderer.flipX = true;
+        if (moveX != 0)
+            animator.SetBool("Andando", true);
+        else
+            animator.SetBool("Andando", false);
 
-        // Verifica se está no chão
-        noChao = Physics2D.OverlapCircle(verificadorChao.position, 0.2f, layerChao);
+        if (moveX > 0)
+            transform.localScale = new Vector3(1, 1, 1);
+        else if (moveX < 0)
+            transform.localScale = new Vector3(-1, 1, 1);
+    }
 
-        // Pulo
-        if (Input.GetKeyDown(KeyCode.Space) && noChao)
-        {
-            rb.linearVelocity = new Vector2(rb.linearVelocity.x, forcaPulo);
-        }
-
-        // Animações
-        andando = movimento != 0;
-        animator.SetBool("Andando", andando);
-        animator.SetBool("NoChao", noChao);
+    void FixedUpdate()
+    {
+        rb.linearVelocity = new Vector2(moveX * speed, rb.linearVelocity.y);
     }
 }
